@@ -12,3 +12,22 @@ Todo
 
 J can finish it if he wants, got another paper todo tonight
 Or you can always try to prettify the variable names.
+
+Installation
+---
+Install python 2.7
+- Numpy
+- NLTK
+
+Can install both with either python-pip or anaconda
+pip install numpy nltk
+conda install numpy nltk
+
+Open a python interpreter and type in
+```python2
+import nltk
+nltk.download()
+```
+Download all of the book collection
+
+Should have a working install.
