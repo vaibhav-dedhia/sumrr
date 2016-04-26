@@ -28,6 +28,8 @@ def parse(filepath):
 
     tokens = []
     sentences = nltk.tokenize.sent_tokenize(text)
+
+    sentences = [sentence.replace('\n', '') for sentence in sentences]
     for sentence in sentences:
         words = nltk.tokenize.word_tokenize(sentence)
         words = [word.lower() for word in words]
@@ -36,7 +38,7 @@ def parse(filepath):
     return sentences, tokens
 
 # performs summarization on each case
-def summarize(casepath):
+def summarize(casepath, sum_len, Y):
     inc = itertools.count()
     vocab = collections.defaultdict(lambda: inc.next())
     data = []
@@ -52,6 +54,9 @@ def summarize(casepath):
             text += a
             data += b
 
+    # Convert text to numpy array for easy indexing
+    text = np.array(text)
+
     # build matrix of (sentence, norm vector)
     token_iter = (token for sentence in data for token in sentence)
     for token in token_iter:
@@ -65,16 +70,23 @@ def summarize(casepath):
     # MMR
     # Centroid is average of all sentences, used as Query parameter
     centroid = mat.mean(axis=0)
-    top = (mat * centroid).sum(axis=1)
-    bottom = ((centroid**2).sum()**0.5) * ((mat**2).sum(axis=1)**0.5)
+    mmr = Y*cosine_sim(mat, centroid)-(1-Y)*cosine_sim(mat, mat)
+    summr = text[np.argsort(mmr)]
+
+    filename = casepath.split('/')[1]
+    with open('System_Summaries/'+filename, 'w') as file:
+        file.write('\n'.join(summr.tolist()))
+
+
+def cosine_sim(A, B):
+    top = (A * B).sum(axis=1)
+    bottom = ((B**2).sum()**0.5) * ((A**2).sum(axis=1)**0.5)
     sim = top / (bottom + 1)
-    print text[sim.argmax()]
-    # Initial. Grap closest sentence to Centroid
-    # Iterations: Grab max{Y * sim(S_unselected, Centroid) -
-    #               (1 - Y) max[sim(S_unselected, S_selected)]}
+    return sim
+
 
 # main iteration through all of the directories.
 for root, cases, _ in os.walk('Documents'):
     for case in cases:
         casepath = os.path.join(root, case)
-        summarize(casepath)
+        summarize(casepath, 100, 0.7)
