@@ -73,6 +73,11 @@ def summarize(casepath, sum_len, Y):
     mmr = Y*cosine_sim(mat, centroid)-(1-Y)*cosine_sim(mat, mat)
     summr = text[np.argsort(mmr)]
 
+    # Create the folder to hold the system summaries if it doesn't exist
+    if not os.path.exists('System_Summaries'):
+       os.makedirs('System_Summaries')
+
+    # Write the summary to a file
     filename = casepath.split('/')[1]
     with open('System_Summaries/'+filename, 'w') as file:
         file.write('\n'.join(summr.tolist()))
