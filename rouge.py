@@ -4,7 +4,6 @@
 import pyrouge
 import json
 
-
 if __name__ == "__main__":
     # You need to modify the following directories 
     # to make pyrouge run properly on your machine
